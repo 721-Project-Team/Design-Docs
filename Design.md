@@ -7,7 +7,7 @@
 >Which parts of the system will this feature rely on or modify? Write down specifics so people involved can review the design doc
 
 ## Glossary (Optional)
->If you are introducing new concepts or giving unintuitive names to components, write them down here.
+As of now, we have not added any unintuitive concepts or names of components.
 
 ## Architectural Design
 >Explain the input and output of the component, describe interactions and breakdown the smaller components if any. Include diagrams if appropriate.
