@@ -15,12 +15,24 @@ This feature relies upon the following files (.h/.cpp is left out for convenienc
 This feature modifies the following files (.h/.cpp is left out for convenience):
 - data_table: adds an InsertIntoFreezingBlock that inserts a tuple into a specific block where the specific block is known to be in the 'Freezing' state and therefore not accessible to readers or writers. This function is intended to only be used only by the block compaction process.
 - block_compactor: modifies the MoveTuple function to update the indexes for every tuple that is moved to a new tuple slot.
-- ** Potentially ** sql_table, storage_interface, bytecode_handlers, bytecodes, vm, bytecode_generator, builtins, and 
+- *Potentially* sql_table, storage_interface, bytecode_handlers, bytecodes, vm, bytecode_generator, builtins, and 
 sema_builtin: this is the chain of files that need to be modified in order to add a built-in that can be utilized by the Terrier Processing Language (TPL).
-- ** Potentially ** other execution engine layer files: additions that are needed to modify the Terrier Processing Language (TPL) API in order to allow compressed data to be operated on.
+- *Potentially* other execution engine layer files: additions that are needed to modify the Terrier Processing Language (TPL) API in order to allow compressed data to be operated on.
 
 ## Architectural Design
->Explain the input and output of the component, describe interactions and breakdown the smaller components if any. Include diagrams if appropriate.
+The different processes that power our component are as follows:
+
+#### Shuffle data within a block for compaction: 
+When a single block is to be compacted, we need to shuffle the TupleSlots within each block by eliminating the gaps between individual TupleSlots in a block and move them all to the beginning of a block. To implement this, we delete all TupleSlots from the block to be compacted and then insert them back in into the same block (or create a new block, depending on our future design). This requires us to add the functionality of insert by specifying the block to which the block is to be inserted in. 
+
+Going forward, we also need to add execution engine builtins to support these operations and also analyze whether bulk insertion will help us improve performance by avoiding locking overhead. 
+
+#### Using the DB executors within block compactor: 
+The current version of block compactor directly operates on the data table and does not update the table indexes. Hence, we need to modify the block compactor to invoke the insert and delete executors from the execution engine. 
+
+#### Background thread for compaction process: 
+When a certain number of GC epochs have passed since the last time that a file was modified, the thread that performs the garbage collection also marks a block for compaction. Currently, there is no background thread running that checks the status of blocks and performs the compaction logic. We are yet to figure out how this component is to be fitted into the system. 
+
 
 ## Design Rationale
 >Explain the goals of this design and how the design achieves these goals. Present alternatives considered and document why they are not chosen.
