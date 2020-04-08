@@ -19,9 +19,6 @@ This feature modifies the following files (.h/.cpp is left out for convenience):
 sema_builtin: this is the chain of files that need to be modified in order to add a built-in that can be utilized by the Terrier Processing Language (TPL).
 - ** Potentially ** other execution engine layer files: additions that are needed to modify the Terrier Processing Language (TPL) API in order to allow compressed data to be operated on.
 
-## Glossary (Optional)
-As of now, we have not added any unintuitive concepts or names of components.
-
 ## Architectural Design
 >Explain the input and output of the component, describe interactions and breakdown the smaller components if any. Include diagrams if appropriate.
 
