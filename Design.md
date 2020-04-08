@@ -12,7 +12,7 @@ This feature relies upon the following files (.h/.cpp is left out for convenienc
 - block_compactor: implements block compaction logic to make data contiguous.
 - access_observer: adds blocks to a compaction queue (part of garbage collection).
 
-This feature modifies (.h/.cpp is left out for convenience):
+This feature modifies the following files (.h/.cpp is left out for convenience):
 - data_table: adds an InsertIntoFreezingBlock that inserts a tuple into a specific block where the specific block is known to be in the 'Freezing' state and therefore not accessible to readers or writers. This function is intended to only be used only by the block compaction process.
 - block_compactor: modifies the MoveTuple function to update the indexes for every tuple that is moved to a new tuple slot.
 - ** Potentially ** sql_table, storage_interface, bytecode_handlers, bytecodes, vm, bytecode_generator, builtins, and 
