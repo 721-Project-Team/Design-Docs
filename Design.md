@@ -4,7 +4,20 @@
 The arrow format stores column attributes in contiguous, aligned memory addresses. In contrast to delta-chain version storage, no pointers are allowed. Because of this, Arrow compression increases the performance of reading (scanning) tuples in a block with the trade-off of increasing the cost of writing (inserting, updating, deleting) tuples in that block. To maximize the benefit of arrow compression while minimizing its cost, block compaction (the process of taking blocks that are not in arrow format and manipulating them so that they are in arrow format) targets blocks that are not as likely to be written to. Block compaction moves tuples so that they are contiguous in memory and then stores each tuple attribute in the arrow format, thereby decreasing the amount of memory used in two ways. While the arrow format and block compaction are currently implemented in the system, their use is not. The 75%, 100%, and 125% goals of our component are: to add index updates to the block compaction process, to support the ability of the execution engine to operate on compressed data, and to provide a compaction policy (when block compaction should occur and on what blocks) that allows arrow compression to fully benefit the system.
 
 ## Scope
->Which parts of the system will this feature rely on or modify? Write down specifics so people involved can review the design doc
+This feature relies upon the following files (.h/.cpp is left out for convenience):
+- storage_defs: defines tuple slot, block, etc.
+- arrow_block_metadata: defines arrow ‘metadata’ (format) of arrow blocks.
+- tuple_access_strategy: determines tuple access in a data table block based on block format (arrow or not arrow).
+- block_access_controller: determines reader/writer access to block based on block status (hot/cooling/cold/frozen).
+- block_compactor: implements block compaction logic to make data contiguous.
+- access_observer: adds blocks to a compaction queue (part of garbage collection).
+
+This feature modifies (.h/.cpp is left out for convenience):
+- data_table: adds an InsertIntoFreezingBlock that inserts a tuple into a specific block where the specific block is known to be in the 'Freezing' state and therefore not accessible to readers or writers. This function is intended to only be used only by the block compaction process.
+- block_compactor: modifies the MoveTuple function to update the indexes for every tuple that is moved to a new tuple slot.
+- ** Potentially ** sql_table, storage_interface, bytecode_handlers, bytecodes, vm, bytecode_generator, builtins, and 
+sema_builtin: this is the chain of files that need to be modified in order to add a built-in that can be utilized by the Terrier Processing Language (TPL).
+- ** Potentially ** other execution engine layer files: additions that are needed to modify the Terrier Processing Language (TPL) API in order to allow compressed data to be operated on.
 
 ## Glossary (Optional)
 As of now, we have not added any unintuitive concepts or names of components.
