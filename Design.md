@@ -20,7 +20,15 @@ sema_builtin: this is the chain of files that need to be modified in order to ad
 - *Potentially* other execution engine layer files: additions that are needed to modify the Terrier Processing Language (TPL) API in order to allow compressed data to be operated on.
 
 ## Architectural Design
-The different processes that power our component are as follows:
+Arrow compression takes a HOT block as input with tuples not necessarily stored in contiguous memory locations. This HOT block is then added to a queue for compaction by the Garbage collector. The `block_compactor` then compacts the blocks in the queue into the arrow format for future reads. These arrow compressed blocks not only have all tuples stored in contiguous locations but also have dictionary compression enabled for variable length entries.
+
+![Compaction Process](images/compaction.png)
+
+Blocks in this whole process can be in one of four states (HOT, COOLING, FREEZING, FROZEN). The details of these states is given below.
+
+![Compaction Process](images/block_states.png)
+
+### The different processes that power our component are as follows:
 
 #### Shuffle data within a block for compaction: 
 When a single block is to be compacted, we need to shuffle the TupleSlots within each block by eliminating the gaps between individual TupleSlots in a block and move them all to the beginning of a block. To implement this, we delete all TupleSlots from the block to be compacted and then insert them back in into the same block (or create a new block, depending on our future design). This requires us to add the functionality of insert by specifying the block to which the block is to be inserted in. 
