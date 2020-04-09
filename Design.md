@@ -43,7 +43,12 @@ When a certain number of GC epochs have passed since the last time that a file w
 
 
 ## Design Rationale
->Explain the goals of this design and how the design achieves these goals. Present alternatives considered and document why they are not chosen.
+We have designed the different processes to enable the arrow compaction scheme with three considerations in mind
+- Ensuring the database consistency is maintained
+- To have the compaction scheme operate seamlessly in the background 
+- Avoid high overhead due to the compaction scheme. 
+
+We ensure that the database consistency is maintained by updating indexes along with the table entries together through the invocation of the database executors and handling conflicts during the compaction process. The compaction process will be designed to run separately in a background thread to minimize the effect on user transaction. The high overhead due to the compaction scheme is taken into consideration by allowing readers to access the data over a large fraction i.e., even during the compaction process and by having the compaction process convert the block state back to HOT without trying to compact or compress the block. 
 
 ## Testing Plan
 First, we would like to establish the baseline performance for OLAP queries by running a standard OLAP workload like TPC-H on terrier. With this information in hand, we can measure the speedup that our implementation provides for OLAP queries.
