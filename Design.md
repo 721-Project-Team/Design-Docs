@@ -20,7 +20,7 @@ sema_builtin: this is the chain of files that need to be modified in order to ad
 - *Potentially* other execution engine layer files: additions that are needed to modify the Terrier Processing Language (TPL) API in order to allow compressed data to be operated on.
 
 ## Architectural Design
-Arrow compression takes a HOT block as input with tuples not necessarily stored in contiguous memory locations. This HOT block is then added to a queue for compaction by the Garbage collector. The `block_compactor` then compacts the blocks in the queue into the arrow format for future reads. These arrow compressed blocks not only have all tuples stored in contiguous locations but also have dictionary compression enabled for variable length entries.
+Arrow compression takes a HOT block as input with tuples not necessarily stored in contiguous memory locations. This HOT block is then added to a queue for compaction by the Garbage collector. The `block_compactor` then compacts the blocks in the queue into the arrow format for future reads. These arrow compressed blocks not only have all tuples stored in contiguous locations but also have dictionary compression enabled.
 
 ![Compaction Process](images/compaction.png)
 
