@@ -5,19 +5,36 @@ The arrow format stores column attributes in contiguous, aligned memory addresse
 
 ## Scope
 This feature relies upon the following files (.h/.cpp is left out for convenience):
-- storage_defs: defines tuple slot, block, etc.
-- arrow_block_metadata: defines arrow ‘metadata’ (format) of arrow blocks.
-- tuple_access_strategy: determines tuple access in a data table block based on block format (arrow or not arrow).
-- block_access_controller: determines reader/writer access to block based on block status (hot/cooling/cold/frozen).
-- block_compactor: implements block compaction logic to make data contiguous.
-- access_observer: adds blocks to a compaction queue (part of garbage collection).
+ - storage_defs: defines tuple slot, block, etc.
+ - arrow_block_metadata: defines arrow ‘metadata’ (format) of arrow blocks.
+ - tuple_access_strategy: determines tuple access in a data table block based on block format (arrow or not arrow).
+ - block_access_controller: determines reader/writer access to block based on block status (hot/cooling/cold/frozen).
+ - block_compactor: implements block compaction logic to make data contiguous.
+ - access_observer: adds blocks to a compaction queue (part of garbage collection).
 
 This feature modifies the following files (.h/.cpp is left out for convenience):
-- data_table: adds an InsertIntoFreezingBlock that inserts a tuple into a specific block where the specific block is known to be in the 'Freezing' state and therefore not accessible to readers or writers. This function is intended to only be used only by the block compaction process.
-- block_compactor: modifies the MoveTuple function to update the indexes for every tuple that is moved to a new tuple slot.
-- *To come...* sql_table, storage_interface, bytecode_handlers, bytecodes, vm, bytecode_generator, builtins, and 
-sema_builtin: this is the chain of files that need to be modified in order to add a built-in that can be utilized by the Terrier Processing Language (TPL).
-- *To come...* other execution engine layer files: additions that are needed to modify the Terrier Processing Language (TPL) API in order to allow compressed data to be operated on.
+ * data_table: Added AllocateSlot for testing TPL code written. CompactionInsertInto functionality added to reallocate the slot if necessary and insert data into a specific slot.
+ * storage_interface: Added TableCompactionCopyTupleSlot to copy contents from one tuple slot to another during compaction.
+ * The chain of files that need to be modified in order to add a built-in that can be utilized by the Terrier Processing Language (TPL) are as follows
+    * sema_builtin.cpp
+ 
+    * bytecode_generator.cpp
+ 
+    * bytecode_handlers.cpp
+ 
+    * vm.cpp
+ 
+    * builtins.h
+ 
+    * bytecode_handlers.h
+ 
+    * Bytecodes.h
+ 
+ * block_compactor: MoveTupleTPL function added to move contents from one slot to another using the execution engine rather than the storage layer.
+ 
+ Tests
+ * compaction-insert-into.tpl : A sample test added for the tpl code written.
+ * block_compactor_tpl_test.cpp : Tests the MoveTupleTpl functionality in block_compactor
 
 ## Architectural Design
 Arrow compression takes a HOT block as input with tuples not necessarily stored in contiguous memory locations. This HOT block is then added to a queue for compaction by the Garbage collector. The `block_compactor` then compacts the blocks in the queue into the arrow format for future reads. These arrow compressed blocks not only have all tuples stored in contiguous locations but also have dictionary compression enabled.
