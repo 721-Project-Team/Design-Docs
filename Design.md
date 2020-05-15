@@ -159,7 +159,7 @@ The following are illustrations of the data formats that are currently supported
 ![Arrow_Format](images/arrow_format_illustration_4.png)
 
 ## TPL Learnings
-* Tpl supports a reduced subset of data types (does not include data types like char)
+* TPL supports a reduced subset of data types (does not include data types like char)
 
 * Builtins are functions that can be called from within TPL starting with an '@'
 
