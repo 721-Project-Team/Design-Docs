@@ -157,3 +157,14 @@ The following are illustrations of the data formats that are currently supported
 
 
 ![Arrow_Format](images/arrow_format_illustration_4.png)
+
+## TPL Learnings
+* Tpl supports a reduced subset of data types (does not include data types like char)
+
+* Builtins are functions that can be called from within TPL starting with an '@'
+
+* Data can be sent to a builtin by either passing them as arguments or as class variables. In the scenario where class variables are used, getters and setters of the class can be used to assign a new value to the class variable.
+
+* The storage interface is used to communicate between the execution layer (TPL) and the storage layer and methods in the storage interface can be called as builtins from within TPL (look at Scope for details).
+
+* Anyone trying to write TPL code can use the `sample_tpl` directory as a reference. This folder contains TPL programs which are solely for testing purposes. Once the TPL code necessary to create a new builtin is tested here, one must proceed to code generation to generate the same TPL code.
