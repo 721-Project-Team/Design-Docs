@@ -100,11 +100,38 @@ The original behaviour of `BlockCompactor` is retained, and we added a new funct
 
 
 ## Future Work
-Currently we are working on our 75% goal which is to enable compression of blocks through the execution layer (updates tables as well as indexes). We are yet to start working on the execution layer but we think we will have to write TPL code which will be called as a builtin from the `block_compactor` code. 
+We have worked toward our 75% goal, which is to enable compression of blocks through the execution layer, updating tables as well as indexes. We have written TPL code that is called from the block compactor code and implements the functionality of moving a tuple. It does not update indexes. The next steps for the 75% goal are to:
+- Add to the block compactor tests the functionality to verify that indexes correctly update
+- Add the index update/delete built-ins to the TPL code and test that the code works
+- Make a new folder titled ‘internal’ in the execution/compiler folder and create a new class called compaction_translator that can generate the TPL code that was hand-written in the block_compactor using codegen. The internal folder is intended to hold translators that are required for internal queries. These translators, like the block compactor, do not necessarily have a plan node or other parts that external queries will have.
 
-For our 100% goal, we will be running OLAP queries directly on top of the compressed data and so, we will have to add functionality for reading FROZEN blocks directly rather than materializing them. 
+The 100% goal is to support the ability of the execution engine to operate on compressed data. Because this is a rather ambitious goal, it is recommended to focus first on supporting scan queries over compressed data. The next steps for the 100% goal are: 
+- Pretend that all tuples will be materialized, which is most in line with the current design of the database. Add functionality for decompressing compressed data so that a scanned tuple can be materialized as it is currently being. This should only require changes to the storage layer, but will allow compression to be used in the system without other changes.
+- Add to the above approach with a design that allows the scan operator to work directly with compressed data. This requires the following steps, which mostly require additions to the execution layer.
+- At the execution layer, add an indicator variable that represents whether a tuple’s block is compacted or, alternatively, give the execution layer some access to a block’s temperature (can assume that are operating on compressed data if a block is FROZEN, otherwise may have to check by tuple)
+- At the execution layer, add a shared pointer to the dictionaries of a tuple’s block, if applicable and on an attribute-by-attribute basis
+- Add functions that can compress/decompress an attribute value given a pointer to a matching dictionary and that can compare compressed data (this could be a comparator).
+- Add functionality to the execution layer that allows it to compress the values that are being searched for by the scan operator (start with equality predicates) and compare those compressed values against the compressed values in an arrow-format block
+- Add functionality to the execution layer that will allow it to optionally use the materialization method or the compression comparison. This decision could be made based on the indicator variable specified above. 
+- Add benchmarks to analyze performance gains and identify optimization opportunities
+ 
+The 125% goal is to provide a compaction policy that allows arrow compression to fully benefit the system. The compaction policy identifies cold blocks to compact into the arrow format. This goal requires experimenting with different policies for when to start and how to manage the cooling process of individual blocks. It would require changes to the policy in the garbage collector code or other thread that uses the block compactor. Changes to the block compactor design would greatly impact this goal (see Redesign Considerations). The next steps for the 125% goal are: 
+- Utilize access statistics that may already be collected to identify blocks that are infrequently modified and can be compacted
+- Analyze performance of compaction with criteria such as:
+     * percent of successful compactions
+     * data table memory usage
+     * achieved compression ratio
+     * speed of scans (the aim that they are faster) and speed of updates (the aim that they are unchanged)
+- Analyze performance of compaction:
+     * Across workloads with different scan characteristics
+     * Across a range of frequencies of when compaction occurs
+     * Across different tuple types (number of columns, column types)
+- Analyze the cause of non-successful compactions to identify design and optimization opportunities
 
-For the 125% goal we have to experiment with the different policies for starting the cooling process. This would involve changes to the policy in the garbage collector code.
+In addition to the our specified goals, there are some other aspects of block compaction that could be considered and improved. These include:
+- Currently a block compaction queue only has one block. Add testing and implementation of multi-block queues, incorporating a design of how long the queues should be on average for good performance.
+- Currently one internal transaction is processing the whole block compaction queue, so if even one block is accessed, the transaction rolls back. Consider other designs for the queue as well as performance constraints.
+- Test to make sure that all changes do not block other transactions.
 
 ## Arrow Format
 The official specification of the Arrow Format can be found at https://arrow.apache.org/docs/format/Columnar.html.
