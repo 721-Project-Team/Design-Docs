@@ -28,7 +28,7 @@ This feature modifies the following files (.h/.cpp is left out for convenience):
  
     * bytecode_handlers.h
  
-    * Bytecodes.h
+    * bytecodes.h
  
  * block_compactor: MoveTupleTPL function added to move contents from one slot to another using the execution engine rather than the storage layer.
  
