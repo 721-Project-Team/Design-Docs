@@ -96,7 +96,7 @@ Potential Problems:
     * To allocate a new TupleSlot 
 * New test in `sample_tpl/` that demonstrates the working of the newly created built-ins which inserts into a specific slot along with index updates.
 * Added a new test file: `block_compactor_tpl_test.cpp` to verify the working of the newly added TPL built-in.
-The original behaviour of `BlockCompactor` is retained, and we added a new function, `MoveTupleTPL` to demonstrate the working of the newly added TPL built-ins. For now, we have used hard-coded TPL code inside the `BlockCompactor`, this needs to be changed to generate code via `CodeGen` once the dependency issue is resolved. As mentioned in Future Plan, it should be redesigned to prevent the circular dependency to `catalog` so that an execution context can be constructed from within the `BlockCompactor`.
+The original behaviour of `BlockCompactor` is retained, and we added a new function, `MoveTupleTPL` to demonstrate the working of the newly added TPL built-ins. For now, we have used hard-coded TPL code inside the `BlockCompactor`, this needs to be changed to generate code via `CodeGen` once the dependency issue is resolved. As mentioned in Future Work, it should be redesigned to prevent the circular dependency to `catalog` so that an execution context can be constructed from within the `BlockCompactor`.
 
 
 ## Future Work
