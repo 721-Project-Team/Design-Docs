@@ -89,6 +89,16 @@ Potential Problems:
 
 - The block compactor was designed with the assumption that memcpy is atomic, but in actuality memcpy is not atomic. [See https://github.com/cmu-db/terrier/issues/402]. This is a problem because there may be a race in the block compaction process.
 
+## Current Status
+* TPL built-ins for the following use cases:
+    * To copy a tuple from one location to another
+    * To insert into a specific TupleSlot
+    * To allocate a new TupleSlot 
+* New test in `sample_tpl/` that demonstrates the working of the newly created built-ins which inserts into a specific slot along with index updates.
+* Added a new test file: `block_compactor_tpl_test.cpp` to verify the working of the newly added TPL built-in.
+The original behaviour of `BlockCompactor` is retained, and we added a new function, `MoveTupleTPL` to demonstrate the working of the newly added TPL built-ins. For now, we have used hard-coded TPL code inside the `BlockCompactor`, this needs to be changed to generate code via `CodeGen` once the dependency issue is resolved. As mentioned in Future Plan, it should be redesigned to prevent the circular dependency to `catalog` so that an execution context can be constructed from within the `BlockCompactor`.
+
+
 ## Future Work
 Currently we are working on our 75% goal which is to enable compression of blocks through the execution layer (updates tables as well as indexes). We are yet to start working on the execution layer but we think we will have to write TPL code which will be called as a builtin from the `block_compactor` code. 
 
