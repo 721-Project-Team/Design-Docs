@@ -105,6 +105,7 @@ We have worked toward our 75% goal, which is to enable compression of blocks thr
 - Add the index update/delete built-ins to the TPL code and test that the code works
 - Make a new folder titled ‘internal’ in the execution/compiler folder and create a new class called compaction_translator that can generate the TPL code that was hand-written in the block_compactor using codegen. The internal folder is intended to hold translators that are required for internal queries. These translators, like the block compactor, do not necessarily have a plan node or other parts that external queries will have.
 
+
 The 100% goal is to support the ability of the execution engine to operate on compressed data. Because this is a rather ambitious goal, it is recommended to focus first on supporting scan queries over compressed data. The next steps for the 100% goal are: 
 - Pretend that all tuples will be materialized, which is most in line with the current design of the database. Add functionality for decompressing compressed data so that a scanned tuple can be materialized as it is currently being. This should only require changes to the storage layer, but will allow compression to be used in the system without other changes.
 - Add to the above approach with a design that allows the scan operator to work directly with compressed data. This requires the following steps, which mostly require additions to the execution layer.
@@ -114,7 +115,8 @@ The 100% goal is to support the ability of the execution engine to operate on co
 - Add functionality to the execution layer that allows it to compress the values that are being searched for by the scan operator (start with equality predicates) and compare those compressed values against the compressed values in an arrow-format block
 - Add functionality to the execution layer that will allow it to optionally use the materialization method or the compression comparison. This decision could be made based on the indicator variable specified above. 
 - Add benchmarks to analyze performance gains and identify optimization opportunities
- 
+
+
 The 125% goal is to provide a compaction policy that allows arrow compression to fully benefit the system. The compaction policy identifies cold blocks to compact into the arrow format. This goal requires experimenting with different policies for when to start and how to manage the cooling process of individual blocks. It would require changes to the policy in the garbage collector code or other thread that uses the block compactor. Changes to the block compactor design would greatly impact this goal (see Redesign Considerations). The next steps for the 125% goal are: 
 - Utilize access statistics that may already be collected to identify blocks that are infrequently modified and can be compacted
 - Analyze performance of compaction with criteria such as:
@@ -127,6 +129,7 @@ The 125% goal is to provide a compaction policy that allows arrow compression to
      * Across a range of frequencies of when compaction occurs
      * Across different tuple types (number of columns, column types)
 - Analyze the cause of non-successful compactions to identify design and optimization opportunities
+
 
 In addition to the our specified goals, there are some other aspects of block compaction that could be considered and improved. These include:
 - Currently a block compaction queue only has one block. Add testing and implementation of multi-block queues, incorporating a design of how long the queues should be on average for good performance.
