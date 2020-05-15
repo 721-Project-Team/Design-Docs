@@ -15,20 +15,18 @@ This feature relies upon the following files (.h/.cpp is left out for convenienc
 This feature modifies the following files (.h/.cpp is left out for convenience):
  * data_table: Added AllocateSlot for testing TPL code written. CompactionInsertInto functionality added to reallocate the slot if necessary and insert data into a specific slot.
  * storage_interface: Added TableCompactionCopyTupleSlot to copy contents from one tuple slot to another during compaction.
- * The chain of files that need to be modified in order to add a built-in that can be utilized by the Terrier Processing Language (TPL) are as follows
-    * sema_builtin.cpp
+ * The chain of files that need to be modified in order to add a built-in that can be utilized by the Terrier Processing Language (TPL) are as follows:
+    * builtins.h: state the internal name and the built-in function name
+    
+    * sema_builtin.cpp: add the new built-in as one of the cases for which CheckBuiltinCall should call a more specific appropriate function, and specify in the more specific appropriate function the conditions that the call to the built-in must satisfy (number of arguments, types of arguments and return type)
  
-    * bytecode_generator.cpp
+    * vm.cpp: define the operation (OP) that matches the built-in; this operation reads register values to define the arguments in order, then calls the bytecode_handlers 'Op' for the built-in with those arguments and jumps to the next instruction with DISPATCH_NEXT()
+    
+    * bytecode_generator.cpp: define what generates/emits the bytecode; defines local variables and then calls Emit on the bytecode of the built-in
  
-    * bytecode_handlers.cpp
+    * bytecodes.h: define the built-in's bytecode with the operand types of its arguments
  
-    * vm.cpp
- 
-    * builtins.h
- 
-    * bytecode_handlers.h
- 
-    * bytecodes.h
+    * bytecode_handlers.h and bytecode_handlers.cpp: define the built-in's OP, which is like a wrapper that call the lower-level function (e.g. from the storage interface) with its arguments
  
  * block_compactor: MoveTupleTPL function added to move contents from one slot to another using the execution engine rather than the storage layer.
  
