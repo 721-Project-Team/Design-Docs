@@ -105,3 +105,18 @@ Currently we are working on our 75% goal which is to enable compression of block
 For our 100% goal, we will be running OLAP queries directly on top of the compressed data and so, we will have to add functionality for reading FROZEN blocks directly rather than materializing them. 
 
 For the 125% goal we have to experiment with the different policies for starting the cooling process. This would involve changes to the policy in the garbage collector code.
+
+## Arrow Format
+The official specification of the Arrow Format can be found at https://arrow.apache.org/docs/format/Columnar.html.
+The following are illustrations of the data formats that are currently supported by Terrier:
+
+![Arrow_Format](images/arrow_format_illustration_1.png)
+
+
+![Arrow_Format](images/arrow_format_illustration_2.png)
+
+
+![Arrow_Format](images/arrow_format_illustration_3.png)
+
+
+![Arrow_Format](images/arrow_format_illustration_4.png)
